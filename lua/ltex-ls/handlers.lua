@@ -25,7 +25,19 @@ local function handle_option_update(client, key, updated_val, uri)
       -- so check if there is not an external file where the user might want to append
       local external_files = vim.tbl_map(function(e) return e:sub(2) end, externals.filter(ltex_settings[lang]))
 
-      if #external_files > 0 then
+      if #external_files == 1 then
+        for _, item in pairs(external_files) do
+          local destfile = io.open(item, "a")
+          if destfile then
+            destfile:write(table.concat(value, "\n") .. "\n")
+            destfile:close()
+          else
+            utils.log("Can't write to " .. item, vim.log.levels.ERROR)
+          end
+        end
+      end
+
+      if #external_files > 1 then
 
         -- User configured an external file, ask where to put the newly added thing
 
